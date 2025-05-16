@@ -1,0 +1,211 @@
+# ~/.gitignore_global can be used for OS-specific files, but good to have here too.
+
+# General
+# ----------------------------------------------------------------------
+# Compiled files, logs, temporary files, etc.
+*.log
+logs
+*.pid
+*.seed
+*.pid.lock
+lib-cov
+coverage
+lcov.info
+*.lcov
+.nyc_output
+jspm_packages/
+web_modules/
+*.tsbuildinfo
+.npm
+*.gz
+*.zip
+*.tar
+*.tgz
+
+# OS generated files
+# ----------------------------------------------------------------------
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+Desktop.ini
+
+# IDE / Editor specific files
+# ----------------------------------------------------------------------
+# VSCode
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+!.vscode/cSpell.json
+
+# JetBrains (IntelliJ, WebStorm, etc.)
+.idea/
+*.iws
+*.iml
+*.ipr
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# Atom
+.atom/
+
+# Vim
+*[._]sw[a-p]
+*.un~
+Session.vim
+
+# Node.js / TypeScript specific (Frontend & Backend)
+# ----------------------------------------------------------------------
+# Dependency directories
+node_modules/
+bower_components/
+
+# Compiled TypeScript output (adjust if your output dirs are different)
+dist/
+build/
+out/
+public/build/ # Common for some frontend frameworks
+*.js # If you compile TS to JS in the same directory (less common for projects)
+*.js.map
+*.mjs
+*.mjs.map
+*.cjs
+*.cjs.map
+
+# NPM/Yarn/PNPM debug files and lock files (if you only commit one type)
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+# If you use npm and commit package-lock.json, you might ignore others:
+# yarn.lock
+# pnpm-lock.yaml
+# If you use yarn and commit yarn.lock:
+# package-lock.json
+# pnpm-lock.yaml
+# If you use pnpm and commit pnpm-lock.yaml:
+# package-lock.json
+# yarn.lock
+
+# Test reports
+junit.xml
+test-results/
+
+# Environment Variables & Secrets (CRITICAL for OAuth, Keycloak, etc.)
+# ----------------------------------------------------------------------
+# NEVER commit your actual .env files with secrets!
+.env
+.env.*.local
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env.development
+.env.test
+.env.production
+
+# Specific secret files
+secrets.*
+credentials.*
+*.pem # Private keys
+*.key # Private keys
+config/master.key # Example for Rails-like master key
+
+# OAuth / Keycloak specific
+# ----------------------------------------------------------------------
+# Any downloaded Keycloak server distributions if not managed by Docker
+keycloak-*/
+# Local Keycloak data if running standalone for dev (often managed by Docker volumes instead)
+# keycloak_data/
+# keycloak_db_data/
+
+# Session store files if stored locally and not in a DB
+sessions/
+
+# Tokens or sensitive configuration downloaded or generated locally
+*.token
+oidc-secrets.json
+keycloak.json # If it contains client secrets and is not a template
+
+# Docker specific
+# ----------------------------------------------------------------------
+# If you have local Docker build artifacts or temporary files not covered by .dockerignore
+# (Usually .dockerignore handles what goes INTO the image context)
+docker-compose.override.yml # If it contains local secrets or overrides not for sharing
+.docker/ # If used for local Docker configurations or data
+
+# Kubernetes (K8s) specific
+# ----------------------------------------------------------------------
+# Local or generated K8s manifest files that include secrets or are not meant to be shared.
+# Source manifests (e.g., Helm chart templates) SHOULD be committed.
+*.local.yaml
+*-dev.yaml
+*-local.yml
+*-dev.yml
+secrets.yaml # If it contains unencrypted secrets (use SealedSecrets or Vault instead!)
+helmfile.local.yaml # For local helmfile overrides
+
+# Packaged Helm charts if you build them locally and don't store them in the repo
+# (Often these are pushed to a chart museum or OCI registry)
+*.tgz # Helm chart packages (if generated in the project and not meant for commit)
+charts/ # If you only want to commit chart sources but not packaged versions within this dir
+tmpcharts/ # Helmfile temporary charts
+
+# Frontend Framework Specific (Examples - Add what's relevant to you)
+# ----------------------------------------------------------------------
+# Next.js
+.next/
+out/ # For static exports
+
+# Create React App
+# build/ (already covered)
+
+# Angular
+# dist/ (already covered)
+# node_modules/ (already covered)
+# coverage/ (already covered)
+# .angular/
+
+# Vue
+# dist/ (already covered)
+# .vite/
+# .nuxt/
+
+# Svelte / SvelteKit
+.svelte-kit/
+build/ # (already covered if outputting to build/)
+
+# IMPORTANT NOTES:
+# 1. .env Files:
+#    - ALWAYS ignore your actual `.env` files containing secrets.
+#    - DO commit a template/example file like `.env.example` or `.env.template`
+#      that shows the required variables without their values.
+#
+# 2. Lock Files:
+#    - Commit the lock file for your primary package manager (`package-lock.json`, `yarn.lock`, or `pnpm-lock.yaml`).
+#    - This ensures consistent dependencies across environments.
+#
+# 3. .vscode/ settings:
+#    - It's common to share some `.vscode` settings like `settings.json` (for linters/formatters),
+#      `launch.json` (for debug configurations), and `extensions.json` (recommended extensions).
+#      The example above ignores everything in `.vscode/` by default but then un-ignores these common files.
+#      Adjust this to your team's preference.
+#
+# 4. Customization:
+#    - This is a comprehensive list. You might not need all of these.
+#    - Remove or add entries based on your specific project structure, tools, and build processes.
+#
+# 5. .dockerignore:
+#    - Remember that Docker uses a separate `.dockerignore` file to specify what files and directories
+#      should be excluded from the build context when building a Docker image. This is different
+#      from `.gitignore`. Your `.dockerignore` will often include `node_modules`, `.git`, `.env`, etc.
+#      to keep your Docker images small and secure.
+
+
