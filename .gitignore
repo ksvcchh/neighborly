@@ -21,6 +21,7 @@ web_modules/
 *.zip
 *.tar
 *.tgz
+serviceAccountKey.json
 
 # OS generated files
 # ----------------------------------------------------------------------
@@ -110,6 +111,8 @@ test-results/
 .env.development
 .env.test
 .env.production
+generate_prompt.sh
+prompt.txt
 
 # Specific secret files
 secrets.*

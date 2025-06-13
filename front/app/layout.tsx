@@ -1,5 +1,12 @@
-import "./globals.css";
-import Header from "./components/Header";
+import "../globals.css";
+import type { Metadata } from "next";
+import { AuthProvider } from "../context/AuthContext";
+import Header from "../components/Header";
+
+export const metadata: Metadata = {
+    title: "Firebase Auth Demo",
+    description: "Next.js and Express with Firebase",
+};
 
 export default function RootLayout({
     children,
@@ -8,9 +15,11 @@ export default function RootLayout({
 }>) {
     return (
         <html lang="en">
-            <body>
-                {<Header />}
-                {children}
+            <body className="bg-[#f6fdfe]">
+                <AuthProvider>
+                    {<Header />}
+                    {children}
+                </AuthProvider>
             </body>
         </html>
     );

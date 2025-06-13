@@ -1,6 +1,6 @@
 import "dotenv/config";
 import morgan from "morgan";
-import express from "express";
+import express, { NextFunction, Request, Response } from "express";
 import cors from "cors";
 import { errorMiddleware } from "./middleware/error.middleware";
 import userRouter from "./route/users.route";

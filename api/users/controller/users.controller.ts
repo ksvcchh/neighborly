@@ -1,33 +1,11 @@
 import * as userM from "../model/users.model";
 import { Request, Response, NextFunction } from "express";
-import { z } from "zod";
 import { Types } from "mongoose";
-
-const AddressSchema = z.object({
-    country: z.string(),
-    city: z.string(),
-    street: z.string(),
-    house: z.string(),
-});
-
-const UserSchema = z.object({
-    _id: z.string(),
-    name: z.string(),
-    surname: z.string(),
-    address: AddressSchema,
-    rating: z.number().min(0).max(5),
-    mail: z.string().email({ message: "Invalid email address" }),
-    createdAt: z.date(),
-});
-
-const UserUpdateSchema = UserSchema.omit({ _id: true, createdAt: true })
-    .partial()
-    .extend({
-        address: AddressSchema.partial().optional(),
-    })
-    .strict();
-
-type IUser = z.infer<typeof UserSchema>;
+import {
+    CreateUserSchema,
+    UpdateUserSchema,
+    UserParamsSchema,
+} from "../schemas/user.schemas";
 
 async function getAllUsersC(_req: Request, res: Response, next: NextFunction) {
     try {
@@ -40,15 +18,16 @@ async function getAllUsersC(_req: Request, res: Response, next: NextFunction) {
 
 async function findUserByIdC(req: Request, res: Response, next: NextFunction) {
     try {
-        const { id } = req.params;
-        const trueId = new Types.ObjectId(id);
-        const result = await userM.findUserById(trueId);
-        if (!result) {
+        const { id } = UserParamsSchema.parse(req.params);
+
+        const user = await userM.findUserById(new Types.ObjectId(id));
+
+        if (!user) {
             res.status(404).json({
-                message: "User with the given Id was not found",
+                message: "User with the given ID was not found",
             });
         } else {
-            res.status(200).json(result);
+            res.status(200).json(user);
         }
     } catch (error) {
         next(error);
@@ -57,19 +36,14 @@ async function findUserByIdC(req: Request, res: Response, next: NextFunction) {
 
 async function createUserC(req: Request, res: Response, next: NextFunction) {
     try {
-        const payload = req.body;
-        UserSchema.omit({ _id: true, createdAt: true }).parse(payload);
-        const result = await userM.createUser(payload);
-        if (!result) {
-            res.status(500).json({
-                message: "Something went wrong during user creation ",
-            });
-        } else {
-            res.status(201).json({
-                message: "User created succesfully!",
-                result,
-            });
-        }
+        const validatedPayload = CreateUserSchema.parse(req.body);
+
+        const newUser = await userM.createUser(validatedPayload);
+
+        res.status(201).json({
+            message: "User created successfully!",
+            user: newUser,
+        });
     } catch (error) {
         next(error);
     }
@@ -77,17 +51,15 @@ async function createUserC(req: Request, res: Response, next: NextFunction) {
 
 async function deleteUserC(req: Request, res: Response, next: NextFunction) {
     try {
-        const { id } = req.params;
-        const trueId = new Types.ObjectId(id);
-        const result = await userM.deleteUserById(trueId);
+        const { id } = UserParamsSchema.parse(req.params);
+        const result = await userM.deleteUserById(new Types.ObjectId(id));
+
         if (!result) {
             res.status(404).json({
-                message: "User with the given Id was not found",
+                message: "User with the given ID was not found",
             });
         } else {
-            res.status(200).json({
-                message: "Document was deleted succesfully",
-            });
+            res.status(204).send();
         }
     } catch (error) {
         next(error);
@@ -100,27 +72,25 @@ async function updateUserByIdC(
     next: NextFunction,
 ) {
     try {
-        const { id } = req.params;
-        const payload = req.body;
-        const trueId = new Types.ObjectId(id);
+        const { id } = UserParamsSchema.parse(req.params);
+        const validatedPayload = UpdateUserSchema.parse(req.body);
 
-        if (!payload) {
-            res.status(500).json({
-                message: "PATCH request's body can not be empty!",
-            });
+        if (Object.keys(validatedPayload).length === 0) {
+            res.status(400).json({ message: "Update payload cannot be empty" });
         } else {
-            UserUpdateSchema.parse(payload);
+            const updatedUser = await userM.updateUserById(
+                new Types.ObjectId(id),
+                validatedPayload,
+            );
 
-            const result = await userM.updateUserById(trueId, payload);
-
-            if (!result) {
+            if (!updatedUser) {
                 res.status(404).json({
-                    message: "User with the given Id was not found",
+                    message: "User with the given ID was not found",
                 });
             } else {
                 res.status(200).json({
-                    message: "User was updated succesfully!",
-                    result,
+                    message: "User was updated successfully!",
+                    user: updatedUser,
                 });
             }
         }
@@ -128,9 +98,7 @@ async function updateUserByIdC(
         next(error);
     }
 }
-
 export {
-    IUser,
     getAllUsersC,
     createUserC,
     findUserByIdC,

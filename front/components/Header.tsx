@@ -5,10 +5,10 @@ function Header() {
     return (
         <div className="flex justify-between items-center">
             <span className="hover:cursor-pointer transition hover:text-[#d79b3c]">
-                <Link href="/profile">Profile</Link>
+                <Link href="/login">Profile</Link>
             </span>
             <span className="hover:cursor-pointer transition hover:text-[#d79b3c]">
-                Offers
+                <Link href="/offers">Offers</Link>
             </span>
             <span className="hover:cursor-pointer transition hover:text-[#d79b3c]">
                 Social
