@@ -1,9 +1,8 @@
-import dotenv from "dotenv";
+// import dotenv from "dotenv";
 import mongoose, { Schema, model } from "mongoose";
 
 interface dbConnectionObj {
     URI: string;
-    DB_NAME: string;
     USERS_COLLECTION_NAME: string;
     TASKS_COLLECTION_NAME: string;
     RATINGS_COLLECTION_NAME: string;
@@ -21,7 +20,7 @@ async function retrieveCollections(): Promise<collectionObj> {
     const connectionObj = checkVariables();
 
     if (!isConnected) {
-        await mongoose.connect(connectionObj.URI + connectionObj.DB_NAME);
+        await mongoose.connect(connectionObj.URI);
         isConnected = true;
     }
 
@@ -108,6 +107,9 @@ async function retrieveCollections(): Promise<collectionObj> {
         },
     );
 
+    tasksSchema.index({ "address.city": 1, status: 1, createdAt: -1 });
+    tasksSchema.index({ description: "text" });
+
     const ratingsSchema = new Schema(
         {
             userId: {
@@ -153,17 +155,13 @@ async function retrieveCollections(): Promise<collectionObj> {
 
 function checkVariables(): dbConnectionObj {
     const MONGODB_URI = process.env.MONGODB_URI;
-    const MONGODB_PORT = process.env.MONGODB_PORT;
-    const DB_NAME = process.env.DB_NAME;
     const USERS_COLLECTION_NAME = process.env.USERS_COLLECTION_NAME;
     const TASKS_COLLECTION_NAME = process.env.TASKS_COLLECTION_NAME;
     const RATINGS_COLLECTION_NAME = process.env.RATINGS_COLLECTION_NAME;
 
     if (
-        dotenv.config().error ||
+        // dotenv.config().error ||
         !MONGODB_URI ||
-        !MONGODB_PORT ||
-        !DB_NAME ||
         !USERS_COLLECTION_NAME ||
         !TASKS_COLLECTION_NAME ||
         !RATINGS_COLLECTION_NAME
@@ -173,10 +171,9 @@ function checkVariables(): dbConnectionObj {
         );
     }
 
-    const URI = MONGODB_URI + MONGODB_PORT;
+    const URI = MONGODB_URI;
     return {
         URI,
-        DB_NAME,
         USERS_COLLECTION_NAME,
         TASKS_COLLECTION_NAME,
         RATINGS_COLLECTION_NAME,

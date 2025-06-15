@@ -10,6 +10,7 @@ function errorMiddleware(
     if (err instanceof ZodError) {
         res.status(500).json({ message: err.issues });
     } else {
+        console.log(err);
         res.status(500).json({ message: err.message });
     }
 }

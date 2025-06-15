@@ -1,0 +1,124 @@
+networks:
+    neighborly-net:
+        driver: bridge
+
+volumes:
+    mongo-data:
+    postgres-data:
+
+secrets:
+    google-sa:
+        file: ./api/gateway/serviceAccountKey.json
+
+services:
+    mongo:
+        image: mongo:7
+        restart: unless-stopped
+        environment:
+            - MONGO_INITDB_ROOT_USERNAME=root
+            - MONGO_INITDB_ROOT_PASSWORD=haslo123
+        volumes:
+            - mongo-data:/data/db
+        networks:
+            - neighborly-net
+
+    postgres:
+        image: postgres:16
+        restart: unless-stopped
+        environment:
+            - POSTGRES_USER=postgres
+            - POSTGRES_PASSWORD=haslo123
+            - POSTGRES_DB=neighborly_reviews
+        healthcheck:
+            test: ["CMD-SHELL", "pg_isready -U postgres -d neighborly_reviews"]
+            interval: 10s
+            timeout: 5s
+            retries: 5
+        volumes:
+            - postgres-data:/var/lib/postgresql/data
+        networks:
+            - neighborly-net
+
+    users:
+        build:
+            context: ./api/users
+            target: runner
+            platforms: [linux/amd64, linux/arm64]
+        environment:
+            NODE_ENV: production
+            PORT: 3001
+            MONGODB_URI: mongodb://root:haslo123@mongo:27017/neighborly?authSource=admin
+            USERS_COLLECTION_NAME: users
+            TASKS_COLLECTION_NAME: tasks
+            RATINGS_COLLECTION_NAME: ratings
+            GATEWAY_URL: http://gateway:3241
+        depends_on: [mongo]
+        networks: [neighborly-net]
+        expose: ["3001"]
+
+    tasks:
+        build:
+            context: ./api/tasks
+            target: runner
+            platforms: [linux/amd64, linux/arm64]
+        environment:
+            NODE_ENV: production
+            PORT: 3002
+            MONGODB_URI: mongodb://root:haslo123@mongo:27017/neighborly?authSource=admin
+            USERS_COLLECTION_NAME: users
+            TASKS_COLLECTION_NAME: tasks
+            RATINGS_COLLECTION_NAME: ratings
+        depends_on: [mongo]
+        networks: [neighborly-net]
+        expose: ["3002"]
+
+    leaderboards:
+        build:
+            context: ./api/leaderboards
+            target: runner
+            platforms: [linux/amd64, linux/arm64]
+        environment:
+            NODE_ENV: production
+            PORT: 3003
+            MONGODB_URI: mongodb://root:haslo123@mongo:27017/neighborly?authSource=admin
+            USERS_COLLECTION_NAME: users
+            TASKS_COLLECTION_NAME: tasks
+            LEADERBOARDS_COLLECTION_NAME: leaderboards
+        depends_on: [mongo]
+        networks: [neighborly-net]
+        expose: ["3003"]
+
+    reviews:
+        build:
+            context: ./api/reviews
+            platforms: [linux/amd64, linux/arm64]
+        environment:
+            ASPNETCORE_ENVIRONMENT: Production
+            ConnectionStrings__MyPostgresConnection: Host=postgres;Port=5432;Username=postgres;Password=haslo123;Database=neighborly_reviews;
+        depends_on:
+            postgres:
+                condition: service_healthy
+        networks: [neighborly-net]
+        expose: ["5111"]
+
+    gateway:
+        secrets:
+            - google-sa
+        build:
+            context: ./api/gateway
+            target: runner
+            platforms: [linux/amd64, linux/arm64]
+        ports:
+            - "3241:3241"
+        environment:
+            NODE_ENV: production
+            PORT: 3241
+            USERS_SERVICE_URL: http://users:3001
+            TASKS_SERVICE_URL: http://tasks:3002
+            REVIEWS_SERVICE_URL: http://reviews:5111
+            LEADERBOARDS_SERVICE_URL: http://leaderboards:3003
+            GOOGLE_APPLICATION_CREDENTIALS: /run/secrets/google-sa
+        volumes:
+            - ./api/gateway/serviceAccountKey.json:/app/serviceAccountKey.json:ro
+        depends_on: [users, tasks, leaderboards, reviews]
+        networks: [neighborly-net]

@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+    name: neighborly-config
+    namespace: neighborly
+data:
+    MONGODB_URI: "mongodb://root:haslo123@mongo:27017/neighborly?authSource=admin"
+    USERS_COLLECTION_NAME: "users"
+    TASKS_COLLECTION_NAME: "tasks"
+    RATINGS_COLLECTION_NAME: "ratings"
+    LEADERBOARDS_COLLECTION_NAME: "leaderboards"
+
+    POSTGRES_DB: "neighborly_reviews"
+    POSTGRES_USER: "postgres"
+
+    USERS_SERVICE_URL: "http://users-service:3001"
+    TASKS_SERVICE_URL: "http://tasks-service:3002"
+    REVIEWS_SERVICE_URL: "http://reviews-service:5111"
+    LEADERBOARDS_SERVICE_URL: "http://leaderboards-service:3003"
+    GATEWAY_URL: "http://gateway-service:3241"
+
+    NODE_ENV: "production"
+    ASPNETCORE_ENVIRONMENT: "Production"

@@ -1,0 +1,94 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: gateway
+    namespace: neighborly
+    labels:
+        app: gateway
+spec:
+    replicas: 3
+    selector:
+        matchLabels:
+            app: gateway
+    template:
+        metadata:
+            labels:
+                app: gateway
+        spec:
+            containers:
+                - name: gateway
+                  image: ksvcchh/neighborly-gateway:latest
+                  ports:
+                      - containerPort: 3241
+                  env:
+                      - name: NODE_ENV
+                        valueFrom:
+                            configMapKeyRef:
+                                name: neighborly-config
+                                key: NODE_ENV
+                      - name: PORT
+                        value: "3241"
+                      - name: USERS_SERVICE_URL
+                        valueFrom:
+                            configMapKeyRef:
+                                name: neighborly-config
+                                key: USERS_SERVICE_URL
+                      - name: TASKS_SERVICE_URL
+                        valueFrom:
+                            configMapKeyRef:
+                                name: neighborly-config
+                                key: TASKS_SERVICE_URL
+                      - name: REVIEWS_SERVICE_URL
+                        valueFrom:
+                            configMapKeyRef:
+                                name: neighborly-config
+                                key: REVIEWS_SERVICE_URL
+                      - name: LEADERBOARDS_SERVICE_URL
+                        valueFrom:
+                            configMapKeyRef:
+                                name: neighborly-config
+                                key: LEADERBOARDS_SERVICE_URL
+                      - name: GOOGLE_APPLICATION_CREDENTIALS
+                        value: "/app/serviceAccountKey.json"
+                  volumeMounts:
+                      - name: firebase-service-account
+                        mountPath: /app/serviceAccountKey.json
+                        subPath: serviceAccountKey.json
+                        readOnly: true
+                  livenessProbe:
+                      httpGet:
+                          path: /health
+                          port: 3241
+                      initialDelaySeconds: 30
+                      periodSeconds: 10
+                  readinessProbe:
+                      httpGet:
+                          path: /health
+                          port: 3241
+                      initialDelaySeconds: 5
+                      periodSeconds: 5
+                  resources:
+                      requests:
+                          memory: "128Mi"
+                          cpu: "100m"
+                      limits:
+                          memory: "256Mi"
+                          cpu: "200m"
+            volumes:
+                - name: firebase-service-account
+                  secret:
+                      secretName: firebase-service-account
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+    name: gateway-service
+    namespace: neighborly
+spec:
+    selector:
+        app: gateway
+    ports:
+        - port: 3241
+          targetPort: 3241
+    type: LoadBalancer

@@ -1,0 +1,83 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: tasks
+    namespace: neighborly
+    labels:
+        app: tasks
+spec:
+    replicas: 2
+    selector:
+        matchLabels:
+            app: tasks
+    template:
+        metadata:
+            labels:
+                app: tasks
+        spec:
+            containers:
+                - name: tasks
+                  image: ksvcchh/neighborly-tasks:latest
+                  ports:
+                      - containerPort: 3002
+                  env:
+                      - name: NODE_ENV
+                        valueFrom:
+                            configMapKeyRef:
+                                name: neighborly-config
+                                key: NODE_ENV
+                      - name: PORT
+                        value: "3002"
+                      - name: MONGODB_URI
+                        valueFrom:
+                            configMapKeyRef:
+                                name: neighborly-config
+                                key: MONGODB_URI
+                      - name: USERS_COLLECTION_NAME
+                        valueFrom:
+                            configMapKeyRef:
+                                name: neighborly-config
+                                key: USERS_COLLECTION_NAME
+                      - name: TASKS_COLLECTION_NAME
+                        valueFrom:
+                            configMapKeyRef:
+                                name: neighborly-config
+                                key: TASKS_COLLECTION_NAME
+                      - name: RATINGS_COLLECTION_NAME
+                        valueFrom:
+                            configMapKeyRef:
+                                name: neighborly-config
+                                key: RATINGS_COLLECTION_NAME
+                  livenessProbe:
+                      httpGet:
+                          path: /tasks/
+                          port: 3002
+                      initialDelaySeconds: 30
+                      periodSeconds: 10
+                  readinessProbe:
+                      httpGet:
+                          path: /tasks/
+                          port: 3002
+                      initialDelaySeconds: 5
+                      periodSeconds: 5
+                  resources:
+                      requests:
+                          memory: "128Mi"
+                          cpu: "100m"
+                      limits:
+                          memory: "256Mi"
+                          cpu: "200m"
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+    name: tasks-service
+    namespace: neighborly
+spec:
+    selector:
+        app: tasks
+    ports:
+        - port: 3002
+          targetPort: 3002
+    type: ClusterIP

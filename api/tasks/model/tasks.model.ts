@@ -62,10 +62,16 @@ async function updateTaskById(
     return collections.Tasks.findByIdAndUpdate(id, payload, { new: true });
 }
 
+async function searchTasks(query: any): Promise<ITaskDocument[]> {
+    const collections = await retrieveCollections();
+    return collections.Tasks.find(query).exec();
+}
+
 export {
     getAllTasks,
     findTaskById,
     createTask,
     deleteTaskById,
     updateTaskById,
+    searchTasks,
 };

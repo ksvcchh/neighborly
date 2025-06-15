@@ -23,7 +23,10 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             entity.Property(e => e.CommentText).HasColumnName("comment_text");
             entity.Property(e => e.CreatedAt).HasColumnName("created_at");
         });
-
+    
+        modelBuilder.Entity<Review>()
+            .HasIndex(r => new { r.TaskId, r.ReviewerUserId })
+            .IsUnique();
     }
     
 }

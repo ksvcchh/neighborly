@@ -1,4 +1,6 @@
-import "dotenv/config";
+if (process.env.NODE_ENV !== "production") {
+    require("dotenv/config");
+}
 import morgan from "morgan";
 import express from "express";
 import cors from "cors";

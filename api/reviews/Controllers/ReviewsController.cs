@@ -52,6 +52,15 @@ namespace reviews.Controllers
 
             context.Reviews.Add(review);
             await context.SaveChangesAsync();
+            
+            try
+            {
+                using var client = new HttpClient();
+                var gw = Environment.GetEnvironmentVariable("GATEWAY_URL") ??
+                         "http://gateway:3241";
+                await client.PostAsync($"{gw}/events/review-created", null);
+            }
+            catch { /* ignore */ }
 
             return CreatedAtAction(nameof(GetReview), new { id = review.Id }, review);
         }

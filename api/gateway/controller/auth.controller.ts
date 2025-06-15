@@ -58,3 +58,38 @@ export async function registerUserHandler(
         next(error);
     }
 }
+
+export async function loginHandler(
+    req: Request,
+    res: Response,
+    next: NextFunction,
+) {
+    try {
+        const { idToken } = z
+            .object({ idToken: z.string().min(10) })
+            .parse(req.body);
+
+        const decoded = await firebaseAuth.verifyIdToken(idToken);
+        res.status(200).json({ uid: decoded.uid });
+    } catch (e) {
+        next(e);
+    }
+}
+
+export async function passwordResetHandler(
+    req: Request,
+    res: Response,
+    next: NextFunction,
+) {
+    try {
+        const { email } = z
+            .object({ email: z.string().email() })
+            .parse(req.body);
+
+        await firebaseAuth.generatePasswordResetLink(email);
+
+        res.status(200).json({ message: "Reset link sent" });
+    } catch (error) {
+        next(error);
+    }
+}

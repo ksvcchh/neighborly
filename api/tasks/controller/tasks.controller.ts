@@ -2,19 +2,19 @@ import { Request, Response, NextFunction } from "express";
 import * as taskM from "../model/tasks.model";
 import { Types } from "mongoose";
 import {
-    TaskSchema,
     TaskUpdateSchema,
     TaskCreationPayloadSchema,
     ITask,
 } from "../schemas/task.schema";
 import { retrieveCollections } from "../services/bd";
+import { buildMongoQuery } from "../utils/queryParser";
 
-async function getAllTasksC(_req: Request, res: Response, next: NextFunction) {
+async function getAllTasksC(req: Request, res: Response, next: NextFunction) {
     try {
-        const tasks = await taskM.getAllTasks();
+        const tasks = await taskM.searchTasks(buildMongoQuery(req.query));
         res.status(200).json(tasks);
-    } catch (error) {
-        next(error);
+    } catch (e) {
+        next(e);
     }
 }
 

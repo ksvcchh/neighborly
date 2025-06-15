@@ -1,10 +1,6 @@
 import axios from "axios";
 
-const USERS_URL = `${process.env.URI}:${process.env.USERS_PORT}`;
-
-if (!USERS_URL) {
-    throw new Error("USER_SERVICE_URL environment variable is not set.");
-}
+const USERS_URL = process.env.USERS_SERVICE_URL || "http://users-service:3001";
 
 export const userApiClient = axios.create({
     baseURL: USERS_URL,
