@@ -12,6 +12,7 @@ import authRouter from "./route/auth.route";
 import { z } from "zod";
 import helmet from "helmet";
 import rateLimit from "express-rate-limit";
+import { taskAuthMiddleware } from "./middleware/taskAuthMiddleware";
 
 const gw = express();
 
@@ -84,23 +85,27 @@ gw.use(
 
 gw.use(
     "/tasks/",
-    (req: Request, res: Response, next: NextFunction) => {
-        if (req.method === "POST") return authMiddleware(req, res, next);
-        next();
-    },
+    taskAuthMiddleware,
     proxy(TASKS_URL, {
         proxyReqPathResolver: (req: Request) => {
             return `/tasks${req.url}`;
         },
         proxyReqOptDecorator: (proxyReqOpts, srcReq) => {
+            const headers = proxyReqOpts.headers as Record<string, string>;
             if (srcReq.method === "GET") {
-                delete (proxyReqOpts.headers as Record<string, string>)[
-                    "content-type"
-                ];
-                delete (proxyReqOpts.headers as Record<string, string>)[
-                    "content-length"
-                ];
+                delete headers["content-type"];
+                delete headers["content-length"];
             }
+
+            const authReq = srcReq as any;
+            if (authReq.user?.uid) {
+                headers["x-firebase-uid"] = authReq.user.uid;
+            }
+
+            if ((srcReq as any).mongoUserId) {
+                headers["x-user-id"] = (srcReq as any).mongoUserId;
+            }
+
             return proxyReqOpts;
         },
 
@@ -115,19 +120,28 @@ gw.use(
 
 gw.use(
     "/reviews/",
+    (req: Request, res: Response, next: NextFunction) => {
+        if (["POST", "PATCH", "DELETE"].includes(req.method)) {
+            return authMiddleware(req, res, next);
+        }
+        next();
+    },
     proxy(REVIEWS_URL, {
         proxyReqPathResolver: (req: Request) => {
             return `/reviews${req.url}`;
         },
         proxyReqOptDecorator: (proxyReqOpts, srcReq) => {
+            const headers = proxyReqOpts.headers as Record<string, string>;
             if (srcReq.method == "GET") {
-                delete (proxyReqOpts.headers as Record<string, string>)[
-                    "content-type"
-                ];
-                delete (proxyReqOpts.headers as Record<string, string>)[
-                    "content-length"
-                ];
+                delete headers["content-type"];
+                delete headers["content-length"];
             }
+
+            const authReq = srcReq as any;
+            if (authReq.user?.uid) {
+                headers["x-firebase-uid"] = authReq.user.uid;
+            }
+
             return proxyReqOpts;
         },
 

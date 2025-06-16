@@ -55,6 +55,11 @@ async function retrieveCollections(): Promise<collectionObj> {
                 street: { type: String, required: true },
                 house: { type: String, required: true },
             },
+            shareLocation: {
+                type: Boolean,
+                required: true,
+                default: false,
+            },
             role: {
                 type: String,
                 enum: ["admin", "editor", "viewer"],
@@ -68,9 +73,7 @@ async function retrieveCollections(): Promise<collectionObj> {
                 default: 0,
             },
         },
-        {
-            timestamps: true,
-        },
+        { timestamps: true },
     );
 
     const tasksSchema = new Schema(
@@ -91,6 +94,23 @@ async function retrieveCollections(): Promise<collectionObj> {
                 default: "open",
                 required: true,
             },
+            category: {
+                type: String,
+                enum: [
+                    "cleaning",
+                    "gardening",
+                    "pet_care",
+                    "repairs",
+                    "shopping",
+                    "delivery",
+                    "tutoring",
+                    "elderly_care",
+                    "moving",
+                    "other",
+                ],
+                default: "other",
+                required: true,
+            },
             address: {
                 country: { type: String, required: true },
                 city: { type: String, required: true },
@@ -101,11 +121,27 @@ async function retrieveCollections(): Promise<collectionObj> {
                 required: true,
                 trim: true,
             },
+            reward: {
+                type: Number,
+                min: 0,
+                default: 0,
+            },
+            difficulty: {
+                type: String,
+                enum: ["easy", "medium", "hard"],
+                default: "medium",
+            },
         },
         {
             timestamps: true,
         },
     );
+
+    tasksSchema.index({ "address.city": 1, status: 1, createdAt: -1 });
+    tasksSchema.index({ category: 1, status: 1 });
+    tasksSchema.index({ reward: 1 });
+    tasksSchema.index({ difficulty: 1 });
+    tasksSchema.index({ description: "text" });
 
     const ratingsSchema = new Schema(
         {

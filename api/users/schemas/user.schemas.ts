@@ -15,6 +15,7 @@ export const CreateUserSchema = z
         surname: z.string(),
         address: AddressSchema,
         mail: z.string().email(),
+        shareLocation: z.boolean().default(false),
     })
     .strict();
 
@@ -31,6 +32,7 @@ export const UpdateUserSchema = CreateUserSchema.omit({ firebaseUid: true })
     .extend({
         address: AddressSchema.partial().optional(),
         role: z.enum(["admin", "editor", "viewer"]).optional(),
+        shareLocation: z.boolean().optional(),
     })
     .strict();
 
@@ -38,6 +40,10 @@ export const UserParamsSchema = z.object({
     id: z.string().refine((val) => Types.ObjectId.isValid(val), {
         message: "Invalid user ID format",
     }),
+});
+
+export const FirebaseUidParamSchema = z.object({
+    firebaseUid: z.string().min(1),
 });
 
 export type CreateUserInput = z.infer<typeof CreateUserSchema>;

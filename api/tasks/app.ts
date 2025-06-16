@@ -10,6 +10,16 @@ const PORT = process.env.PORT;
 
 const app = express();
 
+app.use((req, _res, next) => {
+    console.log(
+        ">>> [Tasks Service] Incoming request:",
+        req.method,
+        req.originalUrl,
+    );
+    console.log(">>> [Tasks Service] Headers:", req.headers);
+    next();
+});
+
 app.use(cors());
 app.use(morgan("dev"));
 app.use(express.json());

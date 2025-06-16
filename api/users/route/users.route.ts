@@ -8,11 +8,15 @@ const GATEWAY_URL = process.env.GATEWAY_URL ?? "http://gateway:3241";
 
 const router = Router();
 
+router.get("/firebase/:firebaseUid", usersC.findUserByFirebaseUidC);
+
 router.get("/", usersC.getAllUsersC);
-router.get("/:id", usersC.findUserByIdC);
 router.post("/", usersC.createUserC);
-router.delete("/:id", allowRoles("admin"), usersC.deleteUserC);
+
+router.get("/:id", usersC.findUserByIdC);
 router.patch("/:id", usersC.updateUserByIdC);
+
+router.delete("/:id", allowRoles("admin"), usersC.deleteUserC);
 
 router.post("/password-reset", async (req, res, next) => {
     try {

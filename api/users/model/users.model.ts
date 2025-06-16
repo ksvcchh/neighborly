@@ -16,6 +16,13 @@ async function findUserById(id: Types.ObjectId): Promise<UserOutput | null> {
     return collections.Users.findById(id).exec();
 }
 
+async function findUserByFirebaseUid(
+    firebaseUid: string,
+): Promise<UserOutput | null> {
+    const { Users } = await retrieveCollections();
+    return Users.findOne({ firebaseUid: firebaseUid.trim() }).exec();
+}
+
 async function createUser(payload: CreateUserInput): Promise<UserOutput> {
     const collections = await retrieveCollections();
     const result = await collections.Users.create({
@@ -43,6 +50,7 @@ async function updateUserById(
 export {
     getAllUsers,
     findUserById,
+    findUserByFirebaseUid,
     createUser,
     deleteUserById,
     updateUserById,

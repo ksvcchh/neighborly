@@ -3,6 +3,7 @@ import { Request, Response, NextFunction } from "express";
 import { Types } from "mongoose";
 import {
     CreateUserSchema,
+    FirebaseUidParamSchema,
     UpdateUserSchema,
     UserParamsSchema,
 } from "../schemas/user.schemas";
@@ -31,6 +32,24 @@ async function findUserByIdC(req: Request, res: Response, next: NextFunction) {
         }
     } catch (error) {
         next(error);
+    }
+}
+
+async function findUserByFirebaseUidC(
+    req: Request,
+    res: Response,
+    next: NextFunction,
+) {
+    try {
+        const { firebaseUid } = FirebaseUidParamSchema.parse(req.params);
+        const user = await userM.findUserByFirebaseUid(firebaseUid);
+        if (!user) {
+            res.status(404).json({ message: "User not found." });
+        } else {
+            res.status(200).json(user);
+        }
+    } catch (err) {
+        next(err as Error);
     }
 }
 
@@ -102,6 +121,7 @@ export {
     getAllUsersC,
     createUserC,
     findUserByIdC,
+    findUserByFirebaseUidC,
     deleteUserC,
     updateUserByIdC,
 };

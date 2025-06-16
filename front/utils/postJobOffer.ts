@@ -5,6 +5,9 @@ interface IValues {
     country: string;
     city: string;
     district: string;
+    category: string;
+    difficulty: string;
+    reward: number;
     status: string;
 }
 
@@ -28,6 +31,9 @@ export default async function postJobOffer(values: IValues) {
         ownerId: user.uid,
         assigneeId: null,
         status: values.status.toLowerCase().replaceAll(" ", "_"),
+        category: values.category,
+        difficulty: values.difficulty,
+        reward: Number(values.reward),
         address: {
             country: values.country,
             city: values.city,
