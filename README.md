@@ -1,36 +1,74 @@
-# Neighborly — A Community Services Exchange
+# Neighborly
 
-## Core Concept
-Imagine a platform where neighbors can request and offer small services (e.g., dog walking, lawn care, tutoring, tech help) within their local community. The app uses a credit or points system (or simple payments) so that people can “earn” credits when they help others and “spend” credits on services they need. The backend uses Flask to handle user and service management, while the Next.js frontend provides a smooth, modern user interface.
+Neighborly is a platform connecting users within local areas to post and accept offers for various tasks, fostering a community of mutual help and service exchange with rewards and a rating system.
 
-## Target User
-- Individuals living in dense neighborhoods or apartment complexes who want to offer or request occasional help.  
-- Busy professionals who need reliable, local assistance.  
-- Retirees or students looking to earn extra income or gain experience in certain skill areas.
+## Overview
 
-## Main Features
-1. **User Profiles & Reputation**  
-   Registered users can set up a profile with skills offered and see a rating/review system reflecting service quality.
+In today's busy world, finding help for everyday tasks or offering your skills to neighbors can be challenging. Neighborly aims to bridge this gap by providing a user-friendly application where individuals can:
 
-2. **Service Listings & Requests**  
-   Users create or browse service listings (“Tutor for 1 hour,” “Help with moving furniture,” etc.) with descriptions, time estimates, and location details.
+*   Post tasks they need help with, specifying details like description, location, reward, and difficulty.
+*   Browse and accept tasks posted by others in their community.
+*   Build reputation through a rating and review system.
+*   Compete on leaderboards for being top task posters or top helpers.
 
-3. **Credits System or Payment Integration**  
-   Users earn and spend credits for completed services or can use standard payments.
+## Key Features
 
-4. **Real-Time Messaging & Notifications**  
-   Built-in messaging for scheduling details, clarifications, and real-time notifications when services are requested or accepted.
+*   **User Authentication:** Secure registration and login for all users.
+*   **Offer Management:**
+    *   Create detailed offers including description, service area, reward, difficulty level, and status (e.g., Open, Accepted, In Progress, Completed, Removed).
+    *   Browse, search, and filter offers.
+*   **Task Interaction:**
+    *   Users can accept offers they are willing to complete.
+    *   Task completion confirmation by the offer poster.
+*   **Reputation System:**
+    *   Rate and review services provided/received after task completion.
+*   **Leaderboards:**
+    *   Ranking for users who have posted the most offers.
+    *   Ranking for users who have successfully completed the most tasks.
+*   **User Profiles:** Viewable profiles showcasing activity and ratings.
+*   **Moderation:** Moderators can handle reports concerning users or reviews to ensure a safe community.
 
-5. **Search & Filtering**  
-   Filter by service type (e.g., pet care, lawn care, tutoring), availability, and user rating to find the right match quickly.
+## Task Categories (Examples)
 
-## Why It’s Valuable
-1. **Solves a Real Need**  
-   Fosters community engagement and satisfies everyday service needs more locally, often cheaper and more reliably than large-scale gig apps.
+To help organize offers, Neighborly might include categories such as:
 
-2. **Nontrivial Business Logic**  
-   The credits/payment system, rating/review workflows, and real-time communication create a rich, hands-on development challenge.
+*   **Household Chores:** (e.g., cleaning, laundry, organizing)
+*   **Outdoor & Garden:** (e.g., lawn mowing, gardening, snow removal)
+*   **Pet Care:** (e.g., dog walking, pet sitting)
+*   **Errands:** (e.g., grocery shopping, package pickup)
+*   **Tech & Digital Help:** (e.g., basic computer setup, social media assistance)
+*   **Handyman & Repairs:** (e.g., minor fixes, assembling furniture)
+*   **Moving & Labor:** (e.g., help with moving boxes, heavy lifting)
+*   **Tutoring & Skills:** (e.g., academic help, music lessons)
 
-3. **Portfolio-Worthy Complexity**  
-   Showcases full-stack expertise (Flask backend, Next.js frontend), authentication, payments or credits, live chats, and robust filtering—enough complexity to demonstrate strong professional skills.
+## Offer Filtering Options (Examples)
 
+Users can find relevant tasks using filters like:
+
+*   **Location/Area:** (e.g., specific neighborhood, distance radius)
+*   **Category:** (as listed above)
+*   **Reward Range:** (e.g., minimum/maximum reward)
+*   **Difficulty Level:** (e.g., Easy, Medium, Hard)
+*   **Status:** (e.g., Open, In Progress)
+*   **Date Posted:** (e.g., newest, oldest)
+
+## Tech Stack
+
+Neighborly is built using a microservice architecture:
+
+*   **Frontend:** Next.js, Tailwind CSS
+*   **Backend APIs:**
+    *   TypeScript, Express.js, MongoDB (Mongoose)
+    *   ASP.NET C#, PostgreSQL (with an ORM like Entity Framework Core)
+
+## Microservice Architecture
+
+The backend is decomposed into several focused microservices that communicate via REST APIs. Potential services include:
+
+*   **UserService:** Manages user accounts and profiles.
+*   **TaskService (OfferService):** Handles creation, management, searching, and status updates of tasks/offers.
+*   **ReviewService:** Manages ratings and reviews for completed tasks.
+*   **RankingService (LeaderboardService):** Calculates and provides data for leaderboards.
+*   **NotificationService:** (Potential) Manages and sends notifications to users.
+*   **ModerationService:** (Potential) Handles reports and moderation actions.
+*   **(API Gateway):** A single entry point for all client requests, routing them to the appropriate microservice.
