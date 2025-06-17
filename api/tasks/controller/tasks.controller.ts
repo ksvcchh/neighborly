@@ -14,6 +14,61 @@ import { z } from "zod";
 async function getAllTasksC(req: Request, res: Response, next: NextFunction) {
     try {
         const query = buildMongoQuery(req.query as any);
+
+        if (req.query.sortBy === "difficulty") {
+            const { Tasks } = await retrieveCollections();
+
+            const pipeline: any[] = [
+                { $match: query },
+                {
+                    $addFields: {
+                        difficultyOrder: {
+                            $switch: {
+                                branches: [
+                                    {
+                                        case: { $eq: ["$difficulty", "easy"] },
+                                        then: 1,
+                                    },
+                                    {
+                                        case: {
+                                            $eq: ["$difficulty", "medium"],
+                                        },
+                                        then: 2,
+                                    },
+                                    {
+                                        case: { $eq: ["$difficulty", "hard"] },
+                                        then: 3,
+                                    },
+                                ],
+                                default: 2,
+                            },
+                        },
+                    },
+                },
+                {
+                    $sort: {
+                        difficultyOrder: req.query.sortOrder === "asc" ? 1 : -1,
+                    },
+                },
+                { $project: { difficultyOrder: 0 } },
+            ];
+
+            const tasks = await Tasks.aggregate(pipeline);
+
+            res.status(200).json({
+                tasks,
+                count: tasks.length,
+                filters: {
+                    status: req.query.status,
+                    city: req.query.city,
+                    category: req.query.category,
+                    difficulty: req.query.difficulty,
+                    search: req.query.search,
+                },
+            });
+            return;
+        }
+
         const sortOptions = buildSortOptions(
             req.query.sortBy as string,
             req.query.sortOrder as "asc" | "desc",

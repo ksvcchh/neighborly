@@ -13,8 +13,22 @@ namespace reviews.Controllers
         private static partial Regex Hex24Regex();
         
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Review>>> GetReviews()
+        public async Task<ActionResult<IEnumerable<Review>>> GetReviews([FromQuery] string? revieweeUserId = null)
         {
+            if (!string.IsNullOrEmpty(revieweeUserId))
+            {
+                if (!IsObjectId(revieweeUserId))
+                {
+                    return BadRequest("revieweeUserId must be a 24-character hexadecimal string.");
+                }
+        
+                var userReviews = await context.Reviews
+                    .Where(r => r.RevieweeUserId == revieweeUserId)
+                    .OrderByDescending(r => r.CreatedAt)
+                    .ToListAsync();
+                return Ok(userReviews);
+            }
+
             var reviews = await context.Reviews.OrderBy(r => r.Id).ToListAsync();
             return Ok(reviews);
         }
@@ -41,7 +55,7 @@ namespace reviews.Controllers
 
             var review = new Review
             {
-                Id = Guid.NewGuid().ToString("N").Substring(0, 24),
+                Id = Guid.NewGuid().ToString("N")[..24],
                 TaskId = reviewDto.TaskId,
                 ReviewerUserId = reviewDto.ReviewerUserId,
                 RevieweeUserId = reviewDto.RevieweeUserId,
@@ -53,6 +67,8 @@ namespace reviews.Controllers
             context.Reviews.Add(review);
             await context.SaveChangesAsync();
             
+            await UpdateUserRating(reviewDto.RevieweeUserId);
+            
             try
             {
                 using var client = new HttpClient();
@@ -60,9 +76,41 @@ namespace reviews.Controllers
                          "http://gateway:3241";
                 await client.PostAsync($"{gw}/events/review-created", null);
             }
-            catch { /* ignore */ }
+            catch
+            {
+                // ignored
+            }
 
             return CreatedAtAction(nameof(GetReview), new { id = review.Id }, review);
+        }
+
+        private async Task UpdateUserRating(string userId)
+        {
+            try
+            {
+                var userReviews = await context.Reviews
+                    .Where(r => r.RevieweeUserId == userId)
+                    .ToListAsync();
+                    
+                if (userReviews.Count != 0)
+                {
+                    var averageRating = userReviews.Average(r => r.RatingScore);
+                    
+                    using var client = new HttpClient();
+                    var usersServiceUrl = Environment.GetEnvironmentVariable("USERS_SERVICE_URL") ??
+                                          "http://users:3001";
+                                          
+                    var updatePayload = new { rating = Math.Round(averageRating, 2) };
+                    var json = System.Text.Json.JsonSerializer.Serialize(updatePayload);
+                    var content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
+                    
+                    await client.PatchAsync($"{usersServiceUrl}/users/{userId}", content);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Failed to update user rating: {ex.Message}");
+            }
         }
 
         [HttpPatch("{id}")]

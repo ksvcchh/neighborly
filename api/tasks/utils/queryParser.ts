@@ -56,17 +56,17 @@ export function buildSortOptions(
     sortOrder: "asc" | "desc" = "desc",
 ): any {
     const sortOptions: any = {};
+    const direction = sortOrder === "asc" ? 1 : -1;
 
     switch (sortBy) {
         case "reward":
-            sortOptions.reward = sortOrder === "asc" ? 1 : -1;
-            break;
-        case "difficulty":
-            const difficultyOrder = { easy: 1, medium: 2, hard: 3 };
-            sortOptions.difficulty = sortOrder === "asc" ? 1 : -1;
+            sortOptions.reward = direction;
             break;
         case "created":
-            sortOptions.createdAt = sortOrder === "asc" ? 1 : -1;
+            sortOptions.createdAt = direction;
+            break;
+        case "difficulty":
+            sortOptions.createdAt = -1;
             break;
         default:
             sortOptions.createdAt = -1;

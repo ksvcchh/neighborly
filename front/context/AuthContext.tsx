@@ -54,8 +54,55 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                             "[AuthContext] Retrieved Mongo ID:",
                             record._id,
                         );
+                    } else if (
+                        res.status === 404 &&
+                        firebaseUser.providerData[0]?.providerId ===
+                            "google.com"
+                    ) {
+                        console.log(
+                            "[AuthContext] Creating Google user profile",
+                        );
+                        const createRes = await fetch(
+                            `${process.env.NEXT_PUBLIC_API_URL}/${process.env.NEXT_PUBLIC_USERS_PATH}`,
+                            {
+                                method: "POST",
+                                headers: {
+                                    "Content-Type": "application/json",
+                                    Authorization: `Bearer ${token}`,
+                                },
+                                body: JSON.stringify({
+                                    firebaseUid: firebaseUser.uid,
+                                    mail: firebaseUser.email,
+                                    name:
+                                        firebaseUser.displayName?.split(
+                                            " ",
+                                        )[0] || "User",
+                                    surname:
+                                        firebaseUser.displayName
+                                            ?.split(" ")
+                                            .slice(1)
+                                            .join(" ") || "Name",
+                                    address: {
+                                        country: "Not specified",
+                                        city: "Not specified",
+                                        street: "Not specified",
+                                        house: "Not specified",
+                                    },
+                                }),
+                            },
+                        );
+
+                        if (createRes.ok) {
+                            const newUser = await createRes.json();
+                            setMongoId(newUser.user._id);
+                            console.log(
+                                "[AuthContext] Created Google user with ID:",
+                                newUser.user._id,
+                            );
+                        }
                     }
-                } catch {
+                } catch (error) {
+                    console.error("[AuthContext] Error handling user:", error);
                     setMongoId(null);
                 } finally {
                     setIdLoading(false);

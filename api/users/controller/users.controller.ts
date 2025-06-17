@@ -6,6 +6,7 @@ import {
     FirebaseUidParamSchema,
     UpdateUserSchema,
     UserParamsSchema,
+    UserSearchSchema,
 } from "../schemas/user.schemas";
 
 async function getAllUsersC(_req: Request, res: Response, next: NextFunction) {
@@ -117,6 +118,38 @@ async function updateUserByIdC(
         next(error);
     }
 }
+
+async function searchUsersC(req: Request, res: Response, next: NextFunction) {
+    try {
+        const validatedQuery = UserSearchSchema.parse(req.query);
+
+        const searchLimit = validatedQuery.limit
+            ? parseInt(validatedQuery.limit)
+            : 20;
+
+        const users = await userM.searchUsers(
+            validatedQuery.query,
+            searchLimit,
+        );
+
+        res.status(200).json(users);
+    } catch (error) {
+        next(error);
+    }
+}
+
+async function getUserStatsC(req: Request, res: Response, next: NextFunction) {
+    try {
+        const { id } = UserParamsSchema.parse(req.params);
+
+        const stats = await userM.getUserStats(new Types.ObjectId(id));
+
+        res.status(200).json(stats);
+    } catch (error) {
+        next(error);
+    }
+}
+
 export {
     getAllUsersC,
     createUserC,
@@ -124,4 +157,6 @@ export {
     findUserByFirebaseUidC,
     deleteUserC,
     updateUserByIdC,
+    searchUsersC,
+    getUserStatsC,
 };

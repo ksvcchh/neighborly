@@ -8,11 +8,13 @@ const GATEWAY_URL = process.env.GATEWAY_URL ?? "http://gateway:3241";
 
 const router = Router();
 
+router.get("/search", usersC.searchUsersC);
 router.get("/firebase/:firebaseUid", usersC.findUserByFirebaseUidC);
 
 router.get("/", usersC.getAllUsersC);
 router.post("/", usersC.createUserC);
 
+router.get("/:id/stats", usersC.getUserStatsC);
 router.get("/:id", usersC.findUserByIdC);
 router.patch("/:id", usersC.updateUserByIdC);
 

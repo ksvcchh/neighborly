@@ -46,6 +46,21 @@ export const FirebaseUidParamSchema = z.object({
     firebaseUid: z.string().min(1),
 });
 
+export const UserSearchSchema = z.object({
+    query: z
+        .string()
+        .min(2, "Search query must be at least 2 characters long")
+        .max(100),
+    limit: z
+        .string()
+        .optional()
+        .refine(
+            (val) => !val || (parseInt(val) >= 1 && parseInt(val) <= 50),
+            "Limit must be between 1 and 50",
+        ),
+});
+
+export type UserSearchInput = z.infer<typeof UserSearchSchema>;
 export type CreateUserInput = z.infer<typeof CreateUserSchema>;
 export type UpdateUserInput = z.infer<typeof UpdateUserSchema>;
 export type UserOutput = z.infer<typeof FullUserSchema>;
